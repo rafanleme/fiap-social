@@ -5,8 +5,6 @@ module.exports = {
   async store(req, res) {
     const { filename } = req.file;
 
-    console.log(req.file);
-
     const { studentId } = req;
 
     if (!filename)
@@ -15,13 +13,15 @@ module.exports = {
     try {
       const student = await Student.findByPk(studentId);
 
-      student.image = filename;
+      const protocol = req.connection.encrypted ? "https://" : "http://";
+
+      student.image = `${protocol}${req.headers.host}/uploads/${filename}`;
 
       student.save();
 
       res.status(201).send({
         studentId,
-        image: filename,
+        image: student.image,
       });
     } catch (error) {
       res.status(500).send(error);

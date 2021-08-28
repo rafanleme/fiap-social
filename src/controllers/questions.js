@@ -75,15 +75,20 @@ module.exports = {
       if (!student)
         return res.status(404).send({ error: "Aluno não encontrado" });
 
+      const protocol = req.connection.encrypted ? "https://" : "http://";
+
+      const image = req.file ? `${protocol}${req.headers.host}/uploads/${req.file.filename}` : null;
+
       //crio a pergunta para o aluno
       let question = await student.createQuestion({
         title,
         description,
-        image: req.file ? req.file.filename : null,
+        image,
         gist,
       });
 
       await question.addCategories(categoriesArr);
+
 
       //retorno sucesso
       res.status(201).send({
@@ -92,7 +97,7 @@ module.exports = {
         description: question.description,
         created_at: question.created_at,
         gist: question.gist,
-        image: req.file ? req.file.filename : null,
+        image
       });
     } catch (error) {
       console.log(error);
